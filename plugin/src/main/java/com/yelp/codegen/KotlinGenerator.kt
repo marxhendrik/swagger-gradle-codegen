@@ -392,17 +392,17 @@ class KotlinGenerator : SharedCodegen() {
 
         when {
             codegenOperation.isResponseFile -> {
-                codegenOperation.returnType = "Single<ResponseBody>"
+                codegenOperation.returnType = "Call<ResponseBody>"
                 codegenOperation.imports.add("okhttp3.ResponseBody")
-                codegenOperation.imports.add("io.reactivex.Single")
+                codegenOperation.imports.add("retrofit2.Call")
             }
             codegenOperation.returnType == null -> {
-                codegenOperation.returnType = "Completable"
-                codegenOperation.imports.add("io.reactivex.Completable")
+                codegenOperation.returnType = "Call"
+                codegenOperation.imports.add("retrofit2.Call")
             }
             else -> {
-                codegenOperation.returnType = "Single<${codegenOperation.returnType}>"
-                codegenOperation.imports.add("io.reactivex.Single")
+                codegenOperation.returnType = "Call<${codegenOperation.returnType}>"
+                codegenOperation.imports.add("retrofit2.Call")
             }
         }
 
