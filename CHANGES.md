@@ -1,6 +1,9 @@
 # swagger-gradle-codegen Release Notes
 
-Here you can find the release notes for this project. Please note that list of releases is available also in the [releases](https://github.com/Yelp/swagger-gradle-codegen/releases) page on Github.
+Here you can find the release notes for this project. Please note that
+list of releases is available also in the
+[releases](https://github.com/marxhendrik/swagger-gradle-codegen/releases)
+page on Github.
 
 ## v1.2.0 (2019-07-31)
 

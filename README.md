@@ -1,6 +1,14 @@
+# Fork
+
+This fork makes some changes to the original branch. Most notably for
+now not generating RxJava2 Retrofit APIs. For the future more
+differences are planned. This is probably not ready for public
+consumption right now.
+
+
+
 # Swagger Gradle Codegen
 
-[![Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/yelp/codegen/plugin/com.yelp.codegen.plugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin%20Portal&colorB=brightgreen)](https://plugins.gradle.org/plugin/com.yelp.codegen.plugin) [![Build Status](https://travis-ci.com/Yelp/swagger-gradle-codegen.svg?branch=master)](https://travis-ci.com/Yelp/swagger-gradle-codegen) [![License](https://img.shields.io/badge/license-Apache2.0%20License-orange.svg)](https://opensource.org/licenses/Apache2.0) [![Twitter](https://img.shields.io/badge/Twitter-@YelpEngineering-blue.svg)](https://twitter.com/YelpEngineering)
 
 A Gradle plugin to **generate networking code** from a **Swagger spec file**.
 
@@ -67,7 +75,7 @@ Here the list of the supported platforms:
 
 | Platform | Description                                |
 | -------- | ------------------------------------------ |
-| `kotlin` | Generates Kotlin code and Retrofit interfaces, with RxJava2 for async calls, Moshi for serialization and ThreeTenABP for Data management |
+| `kotlin` | Generates Kotlin code and Retrofit interfaces, Moshi for serialization and ThreeTenABP for Data management |
 
 We're looking forward to more platforms to support in the future. Contributions are more than welcome.
 
