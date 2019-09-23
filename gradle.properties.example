@@ -1,2 +1,6 @@
-gradle.publish.key=<GRADLE PUBLISH API KEY HERE>
-gradle.publish.secret=<GRADLE PUBLISH API SECRET HERE>
+gradle.publish.key= <GRADLE PUBLISH API KEY HERE>
+gradle.publish.secret= <GRADLE PUBLISH API SECRET HERE>
+maven.publish.repo.release=build/repos/releases
+maven.publish.repo.snapshot=build/repos/snappies
+maven.publish.repo.name=name
+maven.publish.apikey=

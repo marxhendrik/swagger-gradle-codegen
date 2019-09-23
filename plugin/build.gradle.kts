@@ -71,3 +71,20 @@ tasks.jacocoTestReport {
 tasks.check {
     dependsOn(tasks.jacocoTestReport)
 }
+
+
+publishing {
+    publications {
+        create<MavenPublication>("Internal") {
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            val releasesRepoUrl = project.findProperty("maven.publish.repo.release") as String
+            val snapshotsRepoUrl = project.findProperty("maven.publish.repo.snapshot") as String
+            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+            name = project.findProperty("maven.publish.repo.name") as String
+        }
+    }
+}
