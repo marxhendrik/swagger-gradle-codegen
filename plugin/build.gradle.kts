@@ -72,7 +72,6 @@ tasks.check {
     dependsOn(tasks.jacocoTestReport)
 }
 
-
 publishing {
     publications {
         create<MavenPublication>("Internal") {
@@ -81,6 +80,10 @@ publishing {
     }
     repositories {
         maven {
+            credentials {
+                username = project.findProperty("maven.publish.repo.user") as String
+                password = project.findProperty("maven.publish.repo.pw") as String
+            }
             val releasesRepoUrl = project.findProperty("maven.publish.repo.release") as String
             val snapshotsRepoUrl = project.findProperty("maven.publish.repo.snapshot") as String
             url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
@@ -92,6 +95,6 @@ publishing {
 tasks.register("releaseArtifact") {
     group = "publishing"
     description = "Publishes to configured repo in properties"
-    val name = project.findProperty("maven.publish.repo.name") as String
-    setDependsOn(listOf("publishInternalPublicationTo${name.capitalize()}Repository"))
+    val name = project.findProperty("maven.publish.repo.name") as String?
+    setDependsOn(listOf("publishInternalPublicationTo${name?.capitalize()}Repository"))
 }

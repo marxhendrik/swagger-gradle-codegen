@@ -3,4 +3,5 @@ gradle.publish.secret= <GRADLE PUBLISH API SECRET HERE>
 maven.publish.repo.release=build/repos/releases
 maven.publish.repo.snapshot=build/repos/snappies
 maven.publish.repo.name=name
-maven.publish.apikey=
+maven.publish.repo.pw=apikey
+maven.publish.repo.user=username
