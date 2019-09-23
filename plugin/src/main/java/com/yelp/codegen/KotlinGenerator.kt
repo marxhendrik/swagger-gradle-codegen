@@ -18,7 +18,10 @@ import io.swagger.codegen.SupportingFile
 import io.swagger.models.Model
 import io.swagger.models.Operation
 import io.swagger.models.Swagger
+import io.swagger.models.Tag
+import io.swagger.models.parameters.RefParameter
 import io.swagger.models.properties.Property
+import io.swagger.models.properties.RefProperty
 import java.io.File
 
 class KotlinGenerator : SharedCodegen() {
@@ -438,12 +441,65 @@ class KotlinGenerator : SharedCodegen() {
     }
 
     override fun preprocessSwagger(swagger: Swagger) {
+        swagger.tags = filterTags(swagger)
+        filterPaths(swagger)
+        filterDefinitions(swagger)
         super.preprocessSwagger(swagger)
 
         // Override the swagger version with the one provided from command line.
         swagger.info.version = additionalProperties[SPEC_VERSION] as String
         this.basePath = swagger.basePath
     }
+
+    private fun filterOperation(operation: Operation?, tags: List<Tag>) = operation?.let {
+        if (operation.tags.any { name -> tags.map { it.name }.contains(name) }) operation else null
+    }
+
+    private fun filterPaths(swagger: Swagger) {
+        swagger.paths.forEach { entry ->
+            val path = entry.value
+            val tags = swagger.tags
+
+            path.operations.forEach { operation -> operation.tags.removeIf { name -> tags.map { it.name }.any { it != name } } }
+
+            path.delete = filterOperation(path.delete, tags)
+            path.get = filterOperation(path.get, tags)
+            path.post = filterOperation(path.post, tags)
+            path.put = filterOperation(path.put, tags)
+            path.patch = filterOperation(path.patch, tags)
+            path.head = filterOperation(path.head, tags)
+        }
+    }
+
+    private fun filterDefinitions(swagger: Swagger) {
+        val refs = ArrayList<String>()
+
+        swagger.paths.forEach { entry ->
+            val path = entry.value
+            path.operations.forEach { operation ->
+
+                println("PARAMETERS")
+                operation.parameters.forEach {
+                    if (it is RefParameter) {
+                        refs.add(it.simpleRef)
+                    }
+                }
+
+                println("RESPONSES")
+                operation.responses.forEach {
+                    val schema = it.value.schema
+                    if (schema is RefProperty) {
+                        refs.add(schema.simpleRef)
+                    }
+                }
+            }
+        }
+
+        refs.forEach { println(it) }
+        swagger.definitions = swagger.definitions.filter { refs.contains(it.key) }
+    }
+
+    private fun filterTags(swagger: Swagger) = swagger.tags.filter { it.name == "app-api" } //TODO get list of tags from input arguments
 
     /**
      * Function used to sanitize the name for operation generations.
