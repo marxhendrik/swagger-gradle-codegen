@@ -13,6 +13,7 @@ open class GenerateTaskConfiguration(project: Project) {
     var outputDir: File? = null
     var extraFiles: File? = null
     var features: FeatureConfiguration = FeatureConfiguration()
+    var tags: List<String> = emptyList()
 
     fun features(action: Action<FeatureConfiguration>) = action.execute(features)
 }

@@ -31,7 +31,8 @@ class KotlinGenerator : SharedCodegen() {
          * This number represents the version of the kotlin template
          * Please note that is independent from the Plugin version
          */
-        @JvmStatic val VERSION = 12
+        @JvmStatic
+        val VERSION = 12
 
         // Vendor Extension use to generate the list of top level headers
         const val HAS_OPERATION_HEADERS = "hasOperationHeaders"
@@ -43,11 +44,11 @@ class KotlinGenerator : SharedCodegen() {
     internal var basePath: String? = null
 
     private val retrofitImport = mapOf(
-            "GET" to "retrofit2.http.GET",
-            "DELETE" to "retrofit2.http.DELETE",
-            "PATCH" to "retrofit2.http.PATCH",
-            "POST" to "retrofit2.http.POST",
-            "PUT" to "retrofit2.http.PUT"
+        "GET" to "retrofit2.http.GET",
+        "DELETE" to "retrofit2.http.DELETE",
+        "PATCH" to "retrofit2.http.PATCH",
+        "POST" to "retrofit2.http.POST",
+        "PUT" to "retrofit2.http.PUT"
     )
 
     /**
@@ -94,6 +95,9 @@ class KotlinGenerator : SharedCodegen() {
     private val toolsPackage: String
         get() = "$packageName.tools"
 
+    private val tags: List<String>
+        get() = additionalProperties[TAGS] as List<String>? ?: emptyList()
+
     /*
      * FOLDERS SETUP
      ==================================================== */
@@ -101,8 +105,8 @@ class KotlinGenerator : SharedCodegen() {
     override fun apiDocFileFolder() = "$outputFolder${File.separator}$apiDocPath"
 
     override fun apiFileFolder() =
-            "$outputFolder${File.separator}" + apiPackage()
-                    .replace('.', File.separatorChar)
+        "$outputFolder${File.separator}" + apiPackage()
+            .replace('.', File.separatorChar)
 
     /*
      * SHARED CODEGEN SETUP
@@ -110,29 +114,29 @@ class KotlinGenerator : SharedCodegen() {
 
     override val mustacheTags
         get() = hashMapOf(
-                CodegenConstants.GROUP_ID to groupId,
-                CodegenConstants.ARTIFACT_ID to artifactId,
-                CodegenConstants.PACKAGE_NAME to packageName,
-                CodegenConstants.API_PACKAGE to apiPackage(),
-                CodegenConstants.MODEL_PACKAGE to modelPackage(),
-                "apiDocPath" to apiDocPath,
-                "modelDocPath" to modelDocPath,
-                "service" to serviceName,
-                "newline" to "\n"
+            CodegenConstants.GROUP_ID to groupId,
+            CodegenConstants.ARTIFACT_ID to artifactId,
+            CodegenConstants.PACKAGE_NAME to packageName,
+            CodegenConstants.API_PACKAGE to apiPackage(),
+            CodegenConstants.MODEL_PACKAGE to modelPackage(),
+            "apiDocPath" to apiDocPath,
+            "modelDocPath" to modelDocPath,
+            "service" to serviceName,
+            "newline" to "\n"
         )
 
     override val supportFiles: Collection<SupportingFile>
         get() {
             val toolsFolder = toolsPackage.replace(".", File.separator).plus(File.separator)
             val toolsFiles = listOf(
-                    "CollectionFormatConverterFactory.kt",
-                    "CollectionFormats.kt",
-                    "EnumToValueConverterFactory.kt",
-                    "GeneratedCodeConverters.kt",
-                    "TypesAdapters.kt",
-                    "WrapperConverterFactory.kt",
-                    "XNullable.kt",
-                    "XNullableAdapterFactory.kt"
+                "CollectionFormatConverterFactory.kt",
+                "CollectionFormats.kt",
+                "EnumToValueConverterFactory.kt",
+                "GeneratedCodeConverters.kt",
+                "TypesAdapters.kt",
+                "WrapperConverterFactory.kt",
+                "XNullable.kt",
+                "XNullableAdapterFactory.kt"
             )
             supportingFiles.addAll(toolsFiles.map { SupportingFile("tools/$it.mustache", toolsFolder, it) })
             return supportingFiles
@@ -143,15 +147,15 @@ class KotlinGenerator : SharedCodegen() {
 
     @VisibleForTesting
     public override fun listTypeWrapper(listType: String, innerType: String) =
-            "$listType<$innerType>"
+        "$listType<$innerType>"
 
     @VisibleForTesting
     public override fun mapTypeWrapper(mapType: String, innerType: String) =
-            "$mapType<${typeMapping["string"]}, $innerType>"
+        "$mapType<${typeMapping["string"]}, $innerType>"
 
     @VisibleForTesting
     public override fun nullableTypeWrapper(baseType: String) =
-            baseType.safeSuffix("?")
+        baseType.safeSuffix("?")
 
     /*
      * ESCAPING
@@ -171,14 +175,14 @@ class KotlinGenerator : SharedCodegen() {
     override fun escapeQuotationMark(input: String) = input.replace("\"", "")
 
     override fun escapeReservedWord(name: String) =
-            if (name in reservedWords) {
-                "`$name`"
-            } else {
-                name
-            }
+        if (name in reservedWords) {
+            "`$name`"
+        } else {
+            name
+        }
 
     override fun escapeUnsafeCharacters(input: String) =
-            input.replace("*/", "*_/").replace("/*", "/_*")
+        input.replace("*/", "*_/").replace("/*", "/_*")
 
     /*
      * CODEGEN FUNCTIONS
@@ -289,11 +293,11 @@ class KotlinGenerator : SharedCodegen() {
      */
     override fun toEnumVarName(value: String, datatype: String): String {
         (if (value.isEmpty()) "EMPTY" else value)
-                .sanitizeKotlinSpecificNames(specialCharReplacements)
-                .toUpperCase()
-                .let {
-                    return escapeReservedWord(it)
-                }
+            .sanitizeKotlinSpecificNames(specialCharReplacements)
+            .toUpperCase()
+            .let {
+                return escapeReservedWord(it)
+            }
     }
 
     override fun toVarName(name: String): String {
@@ -335,10 +339,10 @@ class KotlinGenerator : SharedCodegen() {
             name
         } else {
             matchXModel(name)
-                    .replace(Regex("(\\.|\\s)"), "_")
-                    .toPascalCase()
-                    .sanitizeKotlinSpecificNames(specialCharReplacements)
-                    .apply { escapeReservedWord(this) }
+                .replace(Regex("(\\.|\\s)"), "_")
+                .toPascalCase()
+                .sanitizeKotlinSpecificNames(specialCharReplacements)
+                .apply { escapeReservedWord(this) }
         }
     }
 
@@ -441,7 +445,8 @@ class KotlinGenerator : SharedCodegen() {
     }
 
     override fun preprocessSwagger(swagger: Swagger) {
-        swagger.tags = filterTags(swagger)
+        swagger.tags = if (tags.isEmpty()) swagger.tags else filterTags(swagger)
+
         filterPaths(swagger)
         filterDefinitions(swagger)
         super.preprocessSwagger(swagger)
@@ -460,7 +465,7 @@ class KotlinGenerator : SharedCodegen() {
             val path = entry.value
             val tags = swagger.tags
 
-            path.operations.forEach { operation -> operation.tags.removeIf { name -> tags.map { it.name }.any { it != name } } }
+            path.operations.forEach { operation -> operation.tags = operation.tags.filter { this.tags.contains(it) } }
 
             path.delete = filterOperation(path.delete, tags)
             path.get = filterOperation(path.get, tags)
@@ -478,14 +483,12 @@ class KotlinGenerator : SharedCodegen() {
             val path = entry.value
             path.operations.forEach { operation ->
 
-                println("PARAMETERS")
                 operation.parameters.forEach {
                     if (it is RefParameter) {
                         refs.add(it.simpleRef)
                     }
                 }
 
-                println("RESPONSES")
                 operation.responses.forEach {
                     val schema = it.value.schema
                     if (schema is RefProperty) {
@@ -495,11 +498,10 @@ class KotlinGenerator : SharedCodegen() {
             }
         }
 
-        refs.forEach { println(it) }
         swagger.definitions = swagger.definitions.filter { refs.contains(it.key) }
     }
 
-    private fun filterTags(swagger: Swagger) = swagger.tags.filter { it.name == "app-api" } //TODO get list of tags from input arguments
+    private fun filterTags(swagger: Swagger) = swagger.tags.filter { tag -> tags.any { tag.name == it } }
 
     /**
      * Function used to sanitize the name for operation generations.

@@ -16,5 +16,6 @@ tasks {
 
         extraFiles = config.extraFiles
         features = config.features
+        tags = config.tags
     }
 }

@@ -58,9 +58,16 @@ open class GenerateTask : DefaultTask() {
 
     @InputFiles
     @Optional
-    @Option(option = "extraFiles",
-            description = "Configures path of the extra files directory to be added to the Generated code.")
+    @Option(
+        option = "extraFiles",
+        description = "Configures path of the extra files directory to be added to the Generated code."
+    )
     var extraFiles: File? = null
+
+    @Input
+    @Optional
+    @Option(option = "tags", description = "List of tags from which the code will be generated from.")
+    var tags: List<String> = emptyList()
 
     @Nested
     @Option(option = "featureHeaderToRemove", description = "")
@@ -74,7 +81,8 @@ open class GenerateTask : DefaultTask() {
         }
         val defaultOutputDir = File(project.buildDir, DEFAULT_OUTPUT_DIR)
 
-        println("""
+        println(
+            """
             ####################
             Yelp Swagger Codegen
             ####################
@@ -87,7 +95,9 @@ open class GenerateTask : DefaultTask() {
             groupId ${'\t'} ${packageName ?: "[ DEFAULT ] default"}
             artifactId ${'\t'} ${packageName ?: "[ DEFAULT ] com.codegen"}
             features ${'\t'} ${features?.headersToRemove?.joinToString(", ")?.ifEmpty { "[  EMPTY  ]" }}
-        """.trimIndent())
+            tags ${'\t'} $tags
+        """.trimIndent()
+        )
 
         val packageName = packageName ?: DEFAULT_PACKAGE
 
@@ -106,6 +116,8 @@ open class GenerateTask : DefaultTask() {
         params.add(inputFile.toString())
         params.add("-o")
         params.add((outputDir ?: defaultOutputDir).toString())
+        params.add("-t")
+        params.add(tags.toString())
 
         if (true == features?.headersToRemove?.isNotEmpty()) {
             params.add("-ignoreheaders")
