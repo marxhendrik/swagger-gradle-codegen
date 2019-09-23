@@ -72,22 +72,43 @@ tasks.check {
     dependsOn(tasks.jacocoTestReport)
 }
 
+
+/**
+ *   CONFIGURATION FOR PUBLISHING OF INTERNAL ARTIFACTS
+ *
+ *   Use gradlew releaseArtifact to release and pass username/passwort and repository urls as parameters:
+ *
+ *   example:
+ *   ./gradlew -Pmaven.publish.repo.pw=repo_pw -Pmaven.publish.repo.user=username -Pmaven.publish.repo.snapshot=url releaseArtifact
+ *
+ */
+
+val repositoryName = "Internal"
+
 publishing {
-    publications {
-        create<MavenPublication>("Internal") {
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            credentials {
-                username = project.findProperty("maven.publish.repo.user") as String
-                password = project.findProperty("maven.publish.repo.pw") as String
+    val publishRepo = project.findProperty("maven.publish.repo.release") as String?
+    val publishSnapShotRepo = project.findProperty("maven.publish.repo.snapshot") as String?
+    val publishUsername = project.findProperty("maven.publish.repo.user") as String?
+    val publishPassword = project.findProperty("maven.publish.repo.pw") as String?
+
+    if ((publishRepo != null || publishSnapShotRepo != null) && publishUsername != null && publishPassword != null) {
+        publications {
+            create<MavenPublication>(repositoryName) {
+                from(components["java"])
             }
-            val releasesRepoUrl = project.findProperty("maven.publish.repo.release") as String
-            val snapshotsRepoUrl = project.findProperty("maven.publish.repo.snapshot") as String
-            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
-            name = project.findProperty("maven.publish.repo.name") as String
+        }
+        repositories {
+            maven {
+                credentials {
+                    username = publishUsername
+                    password = publishPassword
+                }
+
+                val uri = if (version.toString().endsWith("SNAPSHOT")) publishSnapShotRepo else publishRepo
+
+                url = uri(uri ?: "")
+                name = repositoryName
+            }
         }
     }
 }
@@ -95,6 +116,5 @@ publishing {
 tasks.register("releaseArtifact") {
     group = "publishing"
     description = "Publishes to configured repo in properties"
-    val name = project.findProperty("maven.publish.repo.name") as String?
-    setDependsOn(listOf("publishInternalPublicationTo${name?.capitalize()}Repository"))
+    setDependsOn(listOf("publish${repositoryName}PublicationTo${repositoryName}Repository"))
 }

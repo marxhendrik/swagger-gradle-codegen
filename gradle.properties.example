@@ -1,7 +1,6 @@
-gradle.publish.key= <GRADLE PUBLISH API KEY HERE>
-gradle.publish.secret= <GRADLE PUBLISH API SECRET HERE>
-maven.publish.repo.release=build/repos/releases
-maven.publish.repo.snapshot=build/repos/snappies
-maven.publish.repo.name=name
-maven.publish.repo.pw=apikey
-maven.publish.repo.user=username
+gradle.publish.key=<GRADLE PUBLISH API KEY HERE>
+gradle.publish.secret=<GRADLE PUBLISH API SECRET HERE>
+maven.publish.repo.release=<REPO URL>
+maven.publish.repo.snapshot=<REPO URL>
+maven.publish.repo.pw=<REPO PW>
+maven.publish.repo.user=<REPO USERNAME>
