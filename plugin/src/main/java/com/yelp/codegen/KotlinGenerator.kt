@@ -20,6 +20,7 @@ import io.swagger.models.Operation
 import io.swagger.models.Swagger
 import io.swagger.models.Tag
 import io.swagger.models.parameters.RefParameter
+import io.swagger.models.properties.ArrayProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.RefProperty
 import java.io.File
@@ -39,6 +40,7 @@ class KotlinGenerator : SharedCodegen() {
         const val OPERATION_HEADERS = "operationHeaders"
     }
 
+    private val filteredModels: ArrayList<String> = ArrayList()
     private val apiDocPath = "docs/"
     private val modelDocPath = "docs/"
     internal var basePath: String? = null
@@ -477,28 +479,49 @@ class KotlinGenerator : SharedCodegen() {
     }
 
     private fun filterDefinitions(swagger: Swagger) {
-        val refs = ArrayList<String>()
-
         swagger.paths.forEach { entry ->
             val path = entry.value
+
             path.operations.forEach { operation ->
 
                 operation.parameters.forEach {
                     if (it is RefParameter) {
-                        refs.add(it.simpleRef)
+                        filteredModels.add(it.simpleRef)
                     }
                 }
 
                 operation.responses.forEach {
                     val schema = it.value.schema
                     if (schema is RefProperty) {
-                        refs.add(schema.simpleRef)
+                        filteredModels.add(schema.simpleRef)
                     }
                 }
             }
         }
 
-        swagger.definitions = swagger.definitions.filter { refs.contains(it.key) }
+        val list = filteredModels.toList()
+        list.forEach { findModels(it, swagger) }
+
+        swagger.definitions = swagger.definitions.filter { filteredModels.contains(it.key) }
+    }
+
+    private fun findModels(ref: String, swagger: Swagger) {
+        swagger.definitions.filter { ref == it.key }.forEach {
+            it.value.properties.forEach {
+                val property = it.value
+                if (property is ArrayProperty) {
+
+                    val items = property.items
+                    if (items is RefProperty && !filteredModels.contains(items.simpleRef)) {
+                        filteredModels.add(items.simpleRef)
+                        findModels(items.simpleRef, swagger)
+                    }
+                } else if (property is RefProperty && !filteredModels.contains(property.simpleRef)) {
+                    filteredModels.add(property.simpleRef)
+                    findModels(property.simpleRef, swagger)
+                }
+            }
+        }
     }
 
     private fun filterTags(swagger: Swagger) = swagger.tags.filter { tag -> tags.any { tag.name == it } }
