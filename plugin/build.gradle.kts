@@ -88,3 +88,10 @@ publishing {
         }
     }
 }
+
+tasks.register("releaseArtifact") {
+    group = "publishing"
+    description = "Publishes to configured repo in properties"
+    val name = project.findProperty("maven.publish.repo.name") as String
+    setDependsOn(listOf("publishInternalPublicationTo${name.capitalize()}Repository"))
+}
