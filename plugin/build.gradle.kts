@@ -118,3 +118,4 @@ tasks.register("releaseArtifact") {
     description = "Publishes to configured repo in properties"
     setDependsOn(listOf("publish${repositoryName}PublicationTo${repositoryName}Repository"))
 }
+
