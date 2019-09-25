@@ -4,6 +4,7 @@ package com.yelp.codegen
 
 import com.google.common.annotations.VisibleForTesting
 import com.yelp.codegen.utils.KotlinLangUtils
+import com.yelp.codegen.utils.TagFilter
 import com.yelp.codegen.utils.safeSuffix
 import com.yelp.codegen.utils.sanitizeKotlinSpecificNames
 import com.yelp.codegen.utils.toCamelCase
@@ -18,11 +19,7 @@ import io.swagger.codegen.SupportingFile
 import io.swagger.models.Model
 import io.swagger.models.Operation
 import io.swagger.models.Swagger
-import io.swagger.models.Tag
-import io.swagger.models.parameters.RefParameter
-import io.swagger.models.properties.ArrayProperty
 import io.swagger.models.properties.Property
-import io.swagger.models.properties.RefProperty
 import java.io.File
 
 class KotlinGenerator : SharedCodegen() {
@@ -40,7 +37,6 @@ class KotlinGenerator : SharedCodegen() {
         const val OPERATION_HEADERS = "operationHeaders"
     }
 
-    private val filteredModels: ArrayList<String> = ArrayList()
     private val apiDocPath = "docs/"
     private val modelDocPath = "docs/"
     internal var basePath: String? = null
@@ -447,84 +443,14 @@ class KotlinGenerator : SharedCodegen() {
     }
 
     override fun preprocessSwagger(swagger: Swagger) {
-        swagger.tags = if (tags.isEmpty()) swagger.tags else filterTags(swagger)
+        TagFilter().filter(tags, swagger)
 
-        filterPaths(swagger)
-        filterDefinitions(swagger)
         super.preprocessSwagger(swagger)
 
         // Override the swagger version with the one provided from command line.
         swagger.info.version = additionalProperties[SPEC_VERSION] as String
         this.basePath = swagger.basePath
     }
-
-    private fun filterOperation(operation: Operation?, tags: List<Tag>) = operation?.let {
-        if (operation.tags.any { name -> tags.map { it.name }.contains(name) }) operation else null
-    }
-
-    private fun filterPaths(swagger: Swagger) {
-        swagger.paths.forEach { entry ->
-            val path = entry.value
-            val tags = swagger.tags
-
-            path.operations.forEach { operation -> operation.tags = operation.tags.filter { this.tags.contains(it) } }
-
-            path.delete = filterOperation(path.delete, tags)
-            path.get = filterOperation(path.get, tags)
-            path.post = filterOperation(path.post, tags)
-            path.put = filterOperation(path.put, tags)
-            path.patch = filterOperation(path.patch, tags)
-            path.head = filterOperation(path.head, tags)
-        }
-    }
-
-    private fun filterDefinitions(swagger: Swagger) {
-        swagger.paths.forEach { entry ->
-            val path = entry.value
-
-            path.operations.forEach { operation ->
-
-                operation.parameters.forEach {
-                    if (it is RefParameter) {
-                        filteredModels.add(it.simpleRef)
-                    }
-                }
-
-                operation.responses.forEach {
-                    val schema = it.value.schema
-                    if (schema is RefProperty) {
-                        filteredModels.add(schema.simpleRef)
-                    }
-                }
-            }
-        }
-
-        val list = filteredModels.toList()
-        list.forEach { findModels(it, swagger) }
-
-        swagger.definitions = swagger.definitions.filter { filteredModels.contains(it.key) }
-    }
-
-    private fun findModels(ref: String, swagger: Swagger) {
-        swagger.definitions.filter { ref == it.key }.forEach {
-            it.value.properties.forEach {
-                val property = it.value
-                if (property is ArrayProperty) {
-
-                    val items = property.items
-                    if (items is RefProperty && !filteredModels.contains(items.simpleRef)) {
-                        filteredModels.add(items.simpleRef)
-                        findModels(items.simpleRef, swagger)
-                    }
-                } else if (property is RefProperty && !filteredModels.contains(property.simpleRef)) {
-                    filteredModels.add(property.simpleRef)
-                    findModels(property.simpleRef, swagger)
-                }
-            }
-        }
-    }
-
-    private fun filterTags(swagger: Swagger) = swagger.tags.filter { tag -> tags.any { tag.name == it } }
 
     /**
      * Function used to sanitize the name for operation generations.
