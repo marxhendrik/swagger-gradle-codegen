@@ -1,9 +1,11 @@
-# Fork
+# Fork differences
 
 This fork makes some changes to the original branch. Most notably for
-now not generating RxJava2 Retrofit APIs. For the future more
-differences are planned. This is probably not ready for public
-consumption right now.
+now not generating RxJava2 Retrofit API's but just plain Call objects.
+
+Also we filter the APIs by tag and only generate API's for the tags that are passed as arguments.
+
+This is probably not ready for public consumption right now.
 
 
 
